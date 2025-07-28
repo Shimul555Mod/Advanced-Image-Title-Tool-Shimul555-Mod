@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Image & Title Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #e0e7ff;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --white: #ffffff;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      margin: 0;
+      padding: 20px;
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 30px;
+      box-shadow: var(--box-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+    }
+    
+    h1, h2, h3 {
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--primary);
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      border-radius: 2px;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    h2 i {
+      color: var(--primary);
+    }
+    
+    .converter-section, .title-section {
+      margin-bottom: 40px;
+      background: var(--white);
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .converter-section:hover, .title-section:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .drop-area {
+      border: 2px dashed var(--gray);
+      border-radius: var(--border-radius);
+      text-align: center;
+      padding: 50px 20px;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--light);
+      position: relative;
+    }
+    
+    .drop-area:hover {
+      background-color: var(--primary-light);
+      border-color: var(--primary);
+    }
+    
+    .drop-area i {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+    
+    .drop-area p {
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-bottom: 0;
+    }
+    
+    .drop-area .file-info {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+    
+    #fileElem {
+      display: none;
+    }
+    
+    .image-preview-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .image-preview-box {
+      padding: 15px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: var(--border-radius);
+      background: var(--white);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .image-preview-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .image-preview-box img {
+      max-width: 100%;
+      border-radius: 8px;
+      display: block;
+      margin-bottom: 15px;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background: var(--light);
+    }
+    
+    .file-info-group {
+      margin-bottom: 12px;
+    }
+    
+    .file-info-label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-bottom: 3px;
+    }
+    
+    .file-name-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    
+    .file-name-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+    }
+    
+    .btn-primary:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: var(--white);
+    }
+    
+    .btn-success:hover {
+      background: #3ab7d8;
+      transform: translateY(-2px);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+    
+    .btn-sm {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    
+    .btn i {
+      font-size: 14px;
+    }
+    
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: var(--transition);
+    }
+    
+    input[type="text"]:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .progress-container {
+      width: 100%;
+      height: 10px;
+      background: #eee;
+      border-radius: 5px;
+      margin: 20px 0;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--success));
+      transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+      position: relative;
+    }
+    
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+      );
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    #outputBox {
+      margin-top: 20px;
+      position: relative;
+    }
+    
+    #outputTitle {
+      resize: vertical;
+      min-height: 120px;
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      background: #f8f9fa;
+    }
+    
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 120px;
+      background-color: var(--dark);
+      color: var(--white);
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+    }
+    
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--white);
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: baseline;
+      border-radius: 10px;
+      background: var(--primary);
+    }
+    
+    .settings-panel {
+      background: var(--light);
+      padding: 15px;
+      border-radius: var(--border-radius);
+      margin-top: 20px;
+      border: 1px solid #eee;
+    }
+    
+    .settings-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .settings-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .setting-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    .batch-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      background: var(--success);
+      color: var(--white);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transform: translateX(200%);
+      transition: transform 0.3s ease-out;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.error {
+      background: var(--danger);
+    }
+    
+    .notification.warning {
+      background: var(--warning);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 15px;
+      }
+      
+      .image-preview-container {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
+    }
+    
+    /* Animation classes */
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(67, 97, 238, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Advanced Image & Title Tool</h1>
+  
+  <!-- ✅ IMAGE TO WEBP CONVERTER -->
+  <section class="converter-section fade-in">
+    <h2><i class="fas fa-image"></i> Image to WebP Converter</h2>
+    <p class="text-muted">Convert multiple images to WebP format with customizable options</p>
+    
+    <div id="drop-area" class="drop-area pulse">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Drag & Drop images here or click to browse</p>
+      <p class="file-info">Supports JPG, PNG, GIF, SVG (Max 20MB each)</p>
+      <input type="file" id="fileElem" accept="image/*" multiple />
+    </div>
+    
+    <div class="settings-panel">
+      <div class="settings-title">
+        <i class="fas fa-cog"></i>
+        <span>Conversion Settings</span>
+      </div>
+      <div class="settings-group">
+        <div class="setting-option">
+          <label class="toggle-switch">
+            <input type="checkbox" id="preserveQuality" checked>
+            <span class="slider"></span>
+          </label>
+          <span>Preserve Quality</span>
+        </div>
+        <div class="setting-option">
+          <label class="toggle-switch">
+            <input type="checkbox" id="keepOriginalNames" checked>
+            <span class="slider"></span>
+          </label>
+          <span>Keep Original Names</span>
+        </div>
+        <div class="setting-option">
+          <label class="toggle-switch">
+            <input type="checkbox" id="addTimestamp">
+            <span class="slider"></span>
+          </label>
+          <span>Add Timestamp</span>
+        </div>
+      </div>
+    </div>
+    
+    <div id="preview" class="image-preview-container"></div>
+    
+    <div class="batch-actions" id="batchActions" style="display: none;">
+      <div>
+        <span class="badge" id="fileCount">0 files</span>
+        <span style="margin-left: 10px; color: var(--gray); font-size: 0.9rem;">Ready for conversion</span>
+      </div>
+      <button class="btn btn-primary" id="downloadAllBtn">
+        <i class="fas fa-download"></i> Download All as ZIP
+      </button>
+    </div>
+  </section>
+
+  <!-- ✍️ TITLE PROCESSOR -->
+  <section class="title-section fade-in">
+    <h2><i class="fas fa-text-width"></i> Title Processing Tool</h2>
+    <p class="text-muted">Optimize your titles for SEO and file naming conventions</p>
+    
+    <input type="text" id="inputTitle" placeholder="Paste your title here..." />
+    
+    <div class="settings-panel">
+      <div class="settings-title">
+        <i class="fas fa-sliders-h"></i>
+        <span>Processing Options</span>
+      </div>
+      <div class="settings-group">
+        <div>
+          <label for="suffixSelect">Suffix Type:</label>
+          <select id="suffixSelect">
+            <option value="icon">icon</option>
+            <option value="thumbnail">thumbnail</option>
+            <option value="screenshot">screenshot</option>
+            <option value="image">image</option>
+            <option value="photo">photo</option>
+            <option value="custom">custom</option>
+          </select>
+        </div>
+        <div id="customSuffixContainer" style="display: none;">
+          <label for="customSuffix">Custom Suffix:</label>
+          <input type="text" id="customSuffix" placeholder="Enter custom suffix" />
+        </div>
+      </div>
+    </div>
+    
+    <button class="btn btn-success" id="processBtn">
+      <i class="fas fa-magic"></i> Process Title
+    </button>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div id="outputBox">
+      <textarea id="outputTitle" readonly></textarea>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="copyBtn">
+          <i class="far fa-copy"></i> Copy to Clipboard
+        </button>
+        <button class="btn btn-outline" id="clearBtn">
+          <i class="fas fa-trash-alt"></i> Clear
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="notification" class="notification">
+  <i class="fas fa-check-circle"></i>
+  <span id="notificationText">Operation completed successfully!</span>
+</div>
+
+<script>
+/* ========== NOTIFICATION SYSTEM ========== */
+function showNotification(message, type = 'success') {
+  const notification = document.getElementById('notification');
+  const notificationText = document.getElementById('notificationText');
+  
+  notification.className = 'notification';
+  notification.classList.add(type);
+  notificationText.textContent = message;
+  
+  notification.classList.add('show');
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 3000);
+}
+
+/* ========== IMAGE TO WEBP MULTI-CONVERTER ========== */
+const dropArea = document.getElementById('drop-area');
+const fileInput = document.getElementById('fileElem');
+const preview = document.getElementById('preview');
+const batchActions = document.getElementById('batchActions');
+const fileCount = document.getElementById('fileCount');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+const preserveQuality = document.getElementById('preserveQuality');
+const keepOriginalNames = document.getElementById('keepOriginalNames');
+const addTimestamp = document.getElementById('addTimestamp');
+
+let filesToConvert = [];
+let conversionQuality = 0.8;
+
+// Drag and drop handlers
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, preventDefaults, false);
+});
+function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.addEventListener(eventName, () => {
+    dropArea.style.borderColor = 'var(--primary)';
+    dropArea.style.backgroundColor = 'var(--primary-light)';
+  }, false);
+});
+['dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, () => {
+    dropArea.style.borderColor = 'var(--gray)';
+    dropArea.style.backgroundColor = '';
+  }, false);
+});
+
+dropArea.addEventListener('drop', handleDrop, false);
+dropArea.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+// Handle dropped files
+function handleDrop(e) {
+  const dt = e.dataTransfer;
+  handleFiles(dt.files);
+}
+
+// Process selected files
+function handleFiles(files) {
+  if (!files.length) return;
+  
+  // Filter only image files
+  const imageFiles = Array.from(files).filter(file => file.type.match('image.*'));
+  
+  if (imageFiles.length === 0) {
+    showNotification('No valid image files found', 'error');
+    return;
+  }
+  
+  // Check file sizes
+  const oversizedFiles = imageFiles.filter(file => file.size > 20 * 1024 * 1024);
+  if (oversizedFiles.length > 0) {
+    showNotification(`Some files exceed 20MB limit and were skipped`, 'warning');
+  }
+  
+  // Add valid files to conversion queue
+  const validFiles = imageFiles.filter(file => file.size <= 20 * 1024 * 1024);
+  filesToConvert = [...filesToConvert, ...validFiles];
+  
+  // Process each file
+  validFiles.forEach(file => convertToWebP(file));
+  
+  // Update UI
+  updateBatchActions();
+  showNotification(`${validFiles.length} image(s) added for conversion`);
+}
+
+// Convert image to WebP
+function convertToWebP(file) {
+  if (!file.type.match('image.*')) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.src = event.target.result;
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Set quality based on user preference
+      const quality = preserveQuality.checked ? conversionQuality : 0.7;
+      
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        createPreviewBox(file, url, blob.size);
+      }, 'image/webp', quality);
+    };
+  };
+  reader.readAsDataURL(file);
+}
+
+// Create preview box for converted image
+function createPreviewBox(originalFile, webpUrl, webpSize) {
+  // Create box element
+  const box = document.createElement('div');
+  box.className = 'image-preview-box fade-in';
+  
+  // Image preview
+  const imgPreview = document.createElement('img');
+  imgPreview.src = webpUrl;
+  imgPreview.alt = 'Preview of ' + originalFile.name;
+  box.appendChild(imgPreview);
+  
+  // File info group
+  const fileInfoGroup = document.createElement('div');
+  fileInfoGroup.className = 'file-info-group';
+  
+  // Original file info
+  const originalInfo = document.createElement('div');
+  originalInfo.innerHTML = `
+    <span class="file-info-label">Original</span>
+    <div style="display: flex; justify-content: space-between;">
+      <span>${originalFile.name}</span>
+      <span>${formatFileSize(originalFile.size)}</span>
+    </div>
+  `;
+  fileInfoGroup.appendChild(originalInfo);
+  
+  // WebP file info
+  const webpInfo = document.createElement('div');
+  webpInfo.innerHTML = `
+    <span class="file-info-label">WebP</span>
+    <div style="display: flex; justify-content: space-between;">
+      <span>${originalFile.name.replace(/\.[^/.]+$/, "")}.webp</span>
+      <span>${formatFileSize(webpSize)}</span>
+    </div>
+  `;
+  fileInfoGroup.appendChild(webpInfo);
+  box.appendChild(fileInfoGroup);
+  
+  // Filename input
+  const inputBox = document.createElement('input');
+  inputBox.type = 'text';
+  inputBox.className = 'file-name-input';
+  inputBox.placeholder = 'Custom filename (without extension)';
+  
+  // Set default filename based on settings
+  let baseName = originalFile.name.replace(/\.[^/.]+$/, "");
+  if (addTimestamp.checked) {
+    baseName += '_' + new Date().getTime();
+  }
+  inputBox.value = keepOriginalNames.checked ? baseName : '';
+  box.appendChild(inputBox);
+  
+  // Button group
+  const btnGroup = document.createElement('div');
+  btnGroup.className = 'btn-group';
+  
+  // Download button
+  const downloadBtn = document.createElement('button');
+  downloadBtn.className = 'btn btn-primary btn-sm';
+  downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+  downloadBtn.onclick = () => {
+    const link = document.createElement('a');
+    link.href = webpUrl;
+    link.download = (inputBox.value.trim() || baseName) + '.webp';
+    link.click();
+    showNotification('Download started');
+  };
+  btnGroup.appendChild(downloadBtn);
+  
+  // Remove button
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'btn btn-outline btn-sm';
+  removeBtn.innerHTML = '<i class="fas fa-trash"></i> Remove';
+  removeBtn.onclick = () => {
+    box.classList.add('fade-out');
+    setTimeout(() => {
+      preview.removeChild(box);
+      filesToConvert = filesToConvert.filter(f => f.name !== originalFile.name);
+      updateBatchActions();
+    }, 300);
+  };
+  btnGroup.appendChild(removeBtn);
+  box.appendChild(btnGroup);
+  
+  preview.appendChild(box);
+}
+
+// Update batch actions UI
+function updateBatchActions() {
+  fileCount.textContent = `${filesToConvert.length} file${filesToConvert.length !== 1 ? 's' : ''}`;
+  batchActions.style.display = filesToConvert.length > 0 ? 'flex' : 'none';
+}
+
+// Format file size
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Download all as ZIP (placeholder - would need JSZip library in real implementation)
+downloadAllBtn.addEventListener('click', () => {
+  showNotification('This feature would create a ZIP file in a full implementation', 'warning');
+});
+
+// Settings change handlers
+preserveQuality.addEventListener('change', () => {
+  conversionQuality = preserveQuality.checked ? 0.8 : 0.7;
+});
+
+addTimestamp.addEventListener('change', updateBatchActions);
+keepOriginalNames.addEventListener('change', updateBatchActions);
+
+/* ========== TITLE PROCESSING TOOL ========== */
+const inputTitle = document.getElementById('inputTitle');
+const suffixSelect = document.getElementById('suffixSelect');
+const customSuffixContainer = document.getElementById('customSuffixContainer');
+const customSuffix = document.getElementById('customSuffix');
+const processBtn = document.getElementById('processBtn');
+const progressBar = document.getElementById('progressBar');
+const outputTitle = document.getElementById('outputTitle');
+const copyBtn = document.getElementById('copyBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+// Show/hide custom suffix field
+suffixSelect.addEventListener('change', function() {
+  customSuffixContainer.style.display = this.value === 'custom' ? 'block' : 'none';
+});
+
+processBtn.addEventListener('click', processTitle);
+async function processTitle() {
+  let title = inputTitle.value.trim();
+  if (!title) {
+    showNotification('Please enter a title to process', 'error');
+    return;
+  }
+
+  // Get suffix based on selection
+  let suffix = suffixSelect.value;
+  if (suffix === 'custom') {
+    suffix = customSuffix.value.trim() || 'custom';
+  }
+  
+  progressBar.style.width = '0%';
+  processBtn.disabled = true;
+
+  const steps = [
+    t => t,
+    t => t.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').trim(),
+    t => t.replace(/\bv[0-9.]+/gi, '').trim(),
+    t => t.replace(/\|\|/g, '').replace(/:/g, '').replace(/-/g, '_').replace(/&/g, '').replace(/\s{2,}/g, ' ').trim(),
+    t => t.replace(/\s+/g, '_'),
+    t => t.toLowerCase() + '_' + suffix
+  ];
+
+  outputTitle.value = '';
+  for (let i = 0; i < steps.length; i++) {
+    title = steps[i](title);
+    outputTitle.value = title;
+    progressBar.style.width = ((i + 1) / steps.length * 100) + '%';
+    await sleep(400);
+  }
+  
+  processBtn.disabled = false;
+  showNotification('Title processed successfully!');
+}
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+copyBtn.addEventListener('click', () => {
+  if (!outputTitle.value.trim()) {
+    showNotification('Nothing to copy', 'warning');
+    return;
+  }
+  
+  outputTitle.select();
+  document.execCommand('copy');
+  showNotification('Copied to clipboard!');
+});
+
+clearBtn.addEventListener('click', () => {
+  inputTitle.value = '';
+  outputTitle.value = '';
+  progressBar.style.width = '0%';
+});
+</script>
+</body>
+</html>
